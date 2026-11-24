@@ -17,7 +17,7 @@ on:
         description: Gemini model id
         type: string
         required: false
-        default: gemini-2.5-flash
+        default: gemini-3.8-flash
     secrets:
       GEMINI_API_KEY:
         required: true
@@ -61,7 +61,7 @@ jobs:
             let issueCount = parseInt(process.env.INPUT_COUNT || '3', 10);
             if (!Number.isFinite(issueCount) || issueCount < 1) issueCount = 1;
             if (issueCount > 5) issueCount = 5;
-            const modelId = (process.env.INPUT_MODEL || 'gemini-2.5-flash').trim();
+            const modelId = (process.env.INPUT_MODEL || 'gemini-3.8-flash').trim();
 
             if (!process.env.GEMINI_API_KEY) {
               core.setFailed('GEMINI_API_KEY secret is missing');
