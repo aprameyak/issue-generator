@@ -49,7 +49,7 @@ gh secret set GEMINI_API_KEY -R <owner>/<repo>
 | --- | --- | --- |
 | `context` | general codebase improvements | Focus area |
 | `issue_count` | `3` | Clamped to 1–5 |
-| `model` | `gemini-3.8-flash` | Gemini model id |
+| `model` | `gemini-3.5-flash-lite` | Gemini model id |
 
 ## Safety
 

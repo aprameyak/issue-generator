@@ -17,7 +17,7 @@ on:
         description: Gemini model id
         type: string
         required: false
-        default: gemini-3.8-flash
+        default: gemini-3.5-flash-lite
     secrets:
       GEMINI_API_KEY:
         required: true
@@ -61,7 +61,7 @@ jobs:
             let issueCount = parseInt(process.env.INPUT_COUNT || '3', 10);
             if (!Number.isFinite(issueCount) || issueCount < 1) issueCount = 1;
             if (issueCount > 5) issueCount = 5;
-            const modelId = (process.env.INPUT_MODEL || 'gemini-3.8-flash').trim();
+            const modelId = (process.env.INPUT_MODEL || 'gemini-3.5-flash-lite').trim();
 
             if (!process.env.GEMINI_API_KEY) {
               core.setFailed('GEMINI_API_KEY secret is missing');
@@ -175,7 +175,12 @@ jobs:
             }
             `;
 
-            const retryable = (e) => [429, 500, 502, 503, 504].includes(e.status);
+            const retryable = (e) => {
+              const status = e && e.status;
+              if ([429, 500, 502, 503, 504].includes(status)) return true;
+              const msg = String((e && e.message) || e || '');
+              return /fetch failed|ECONNRESET|ETIMEDOUT|socket|503|429/i.test(msg);
+            };
             const maxAttempts = 6;
             let result;
             for (let attempt = 1; ; attempt++) {
@@ -187,8 +192,8 @@ jobs:
                   core.setFailed(`Gemini request failed after ${attempt} attempt(s): ${e.message}`);
                   return;
                 }
-                const delay = 5000 * 2 ** (attempt - 1);
-                console.log(`Gemini returned ${e.status}, retrying in ${delay / 1000}s (attempt ${attempt}/${maxAttempts})`);
+                const delay = Math.min(5000 * 2 ** (attempt - 1), 60000);
+                console.log(`Gemini error (${e.status || 'network'}), retrying in ${delay / 1000}s (attempt ${attempt}/${maxAttempts})`);
                 await new Promise((resolve) => setTimeout(resolve, delay));
               }
             }
